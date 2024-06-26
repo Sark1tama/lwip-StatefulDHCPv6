@@ -1,3 +1,16 @@
+# Enhancements and New Features
+
+## Stateful DHCPv6 Support
+
+This project has been enhanced to include support for Stateful DHCPv6. This functionality allows devices to obtain IPv6 addresses and other configuration information from a DHCPv6 server.
+
+### Features
+
+- **Stateful DHCPv6 Support**: The new implementation supports full stateful DHCPv6, including address assignment, renewal, and rebind processes.
+- **Compatibility**: The stateful DHCPv6 feature has been tested and confirmed to work on the following devices:
+  - GD32F450ZG
+
+# Original README
 INTRODUCTION
 
 lwIP is a small independent implementation of the TCP/IP protocol suite.
