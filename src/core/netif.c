@@ -1034,6 +1034,9 @@ netif_set_link_up(struct netif *netif)
 
     netif_issue_reports(netif, NETIF_REPORT_TYPE_IPV4 | NETIF_REPORT_TYPE_IPV6);
 #if LWIP_IPV6
+#if LWIP_IPV6_DHCP6_STATEFUL && LWIP_IPV6_DHCP6
+    dhcp6_network_changed(netif);
+#endif /* LWIP_IPV6_DHCP6_STATEFUL */
     nd6_restart_netif(netif);
 #endif /* LWIP_IPV6 */
 

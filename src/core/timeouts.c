@@ -110,6 +110,9 @@ const struct lwip_cyclic_timer lwip_cyclic_timers[] = {
   {MLD6_TMR_INTERVAL, HANDLER(mld6_tmr)},
 #endif /* LWIP_IPV6_MLD */
 #if LWIP_IPV6_DHCP6
+#if LWIP_IPV6_DHCP6_STATEFUL
+  {DHCP6_COARSE_TIMER_MSECS, HANDLER(dhcp6_coarse_tmr)},
+#endif /* LWIP_IPV6_DHCP6_STATEFUL */
   {DHCP6_TIMER_MSECS, HANDLER(dhcp6_tmr)},
 #endif /* LWIP_IPV6_DHCP6 */
 #endif /* LWIP_IPV6 */

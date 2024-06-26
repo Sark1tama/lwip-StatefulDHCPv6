@@ -66,12 +66,51 @@ PACK_STRUCT_END
 #  include "arch/epstruct.h"
 #endif
 
+#if LWIP_IPV6_DHCP6_STATEFUL
+#define HW_TYPE_ETHERNET            1 /* Ethernet */
+#define DHCP6_DUID_LLT_LEN          14 /* LLT: Link-layer Address Plus Time */
+#define DHCP6_DUID_EN_LEN           7 /* EN: Enterprise number */
+#define DHCP6_DUID_LL_LEN           10 /* LL: Link-layer Address */
+#define DHCP6_DUID_UUID_LEN         18 /* UUID (RFC 6355) */
+
+#define DHCP6_STATEFUL_DAD_TIMEOUT	(10000/DHCP6_TIMER_MSECS)
+
+#define REQ_TIMEOUT 1
+#define CNF_TIMEOUT 1
+#define REN_TIMEOUT 10
+#define REB_TIMEOUT 10
+#define REL_TIMEOUT 1
+#define DEC_TIMEOUT 1
+
+#define REQ_MAX_RC 10
+#define REL_MAX_RC 4
+#define DEC_MAX_RC 4
+
+#define CNF_MAX_RD 10
+
+#define REQ_MAX_RT 30
+#define CNF_MAX_RT 4
+#define REN_MAX_RT 600
+#define REB_MAX_RT 600
+#endif  /* LWIP_IPV6_DHCP6_STATEFUL */
 
 /* DHCP6 client states */
 typedef enum {
   DHCP6_STATE_OFF               = 0,
   DHCP6_STATE_STATELESS_IDLE    = 1,
   DHCP6_STATE_REQUESTING_CONFIG = 2
+  #if LWIP_IPV6_DHCP6_STATEFUL
+	,
+	DHCP6_STATE_STATEFUL_IDLE					= 3,
+	DHCP6_STATE_STATEFUL_DAD 					= 4,
+	DHCP6_STATE_STATEFUL_SOLICITING 	= 5,
+  DHCP6_STATE_STATEFUL_REQUESTING		= 6,
+	DHCP6_STATE_STATEFUL_CONFIRMING 	= 7,
+  DHCP6_STATE_STATEFUL_RENEWING 		= 8,
+	DHCP6_STATE_STATEFUL_REBINDING		= 9,
+	DHCP6_STATE_STATEFUL_RELEASEING 	= 10,
+	DHCP6_STATE_STATEFUL_DELICINING 	= 11
+#endif  /* LWIP_IPV6_DHCP6_STATEFUL */
 } dhcp6_state_enum_t;
 
 /* DHCPv6 message types */
@@ -129,7 +168,9 @@ typedef enum {
 #define DHCP6_OPTION_DNS_SERVERS    23 /* RFC 3646 */
 #define DHCP6_OPTION_DOMAIN_LIST    24 /* RFC 3646 */
 #define DHCP6_OPTION_SNTP_SERVERS   31 /* RFC 4075 */
-
+#define DHCP6_OPTION_CLIENT_FQDN 		39
+#define DHCP6_OPTION_SOL_MAX_RT 		82 /* Required for Solicit */
+#define DHCP6_OPTION_INF_MAX_RT 		83 /* Required for Information-request */
 
 #ifdef __cplusplus
 }

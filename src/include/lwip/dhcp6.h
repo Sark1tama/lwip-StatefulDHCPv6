@@ -51,8 +51,41 @@
 extern "C" {
 #endif
 
+#if LWIP_IPV6_DHCP6_STATEFUL
+/** period (in seconds) of the application calling dhcp6_coarse_tmr() */
+#define DHCP6_COARSE_TIMER_SECS 60
+/** period (in milliseconds) of the application calling dhcp6_coarse_tmr() */
+#define DHCP6_COARSE_TIMER_MSECS (DHCP6_COARSE_TIMER_SECS * 1000UL)
+#endif /* LWIP_IPV6_DHCP6_STATEFUL */
+
 /** period (in milliseconds) of the application calling dhcp6_tmr() */
 #define DHCP6_TIMER_MSECS   500
+
+#if LWIP_IPV6_DHCP6_STATEFUL
+typedef struct {
+    uint16_t type;
+    union {
+        struct {
+					  uint16_t hw_type;
+						uint32_t timestamp;
+            uint8_t mac_addr[ETH_HWADDR_LEN];
+        } llt;
+        struct {
+            uint32_t enterprise_number;
+            uint8_t variable[1]; // Variable part
+        } en;
+        struct {
+						uint16_t hw_type;
+            uint8_t mac_addr[ETH_HWADDR_LEN];
+        } ll;
+        struct {
+            uint8_t uuid[16];
+        } uuid;
+    } data;
+} DUID;
+#endif  /* LWIP_IPV6_DHCP6_STATEFUL */
+
+#define LWIP_DHCP6_MAX_DHCPV6_SERVERS 1
 
 struct dhcp6
 {
@@ -70,6 +103,25 @@ struct dhcp6
   u16_t request_timeout;
 #if LWIP_IPV6_DHCP6_STATEFUL
   /* @todo: add more members here to keep track of stateful DHCPv6 data, like lease times */
+  u16_t t1_timeout;     /* #ticks with period DHCP6_COARSE_TIMER_SECS for renewal time */
+  u16_t t2_timeout;     /* #ticks with period DHCP6_COARSE_TIMER_SECS for rebind time */
+  u16_t t1_renew_time;  /* #ticks with period DHCP6_COARSE_TIMER_SECS until next renew try */
+  u16_t t2_rebind_time; /* #ticks with period DHCP6_COARSE_TIMER_SECS until next rebind try */
+  u16_t lease_used;     /* #ticks with period DHCP6_COARSE_TIMER_SECS since last received DHCP ack */
+  u16_t t0_timeout;     /* #ticks with period DHCP6_COARSE_TIMER_SECS for lease time */
+
+  u32_t ia_id;
+  DUID client_duid;
+  DUID server_duid;
+  ip_addr_t server_ip_addr; /* dhcpv6 server address that offered this lease (ip_addr_t because passed to UDP) */
+
+  u32_t offered_t1_renew;  /* recommended renew time (usually 50% of lease period) */
+  u32_t offered_t2_rebind; /* recommended rebind time (usually 87.5 of lease period)  */
+
+  ip6_addr_t offered_ip_addr;
+  u32_t offered_preferred_lifetime; /* ipv6 addr preferred_lifetime (in seconds) */
+  u32_t offered_valid_lifetime;     /* ipv6 addr valid_lifetime (in seconds) */
+  u8_t netif_addr_idx;
 #endif /* LWIP_IPV6_DHCP6_STATEFUL */
 };
 
@@ -81,7 +133,11 @@ void dhcp6_cleanup(struct netif *netif);
 err_t dhcp6_enable_stateful(struct netif *netif);
 err_t dhcp6_enable_stateless(struct netif *netif);
 void dhcp6_disable(struct netif *netif);
-
+#if LWIP_IPV6_DHCP6_STATEFUL
+/* to be called every minute */
+void dhcp6_coarse_tmr(void);
+void dhcp6_network_changed(struct netif *netif);
+#endif /* LWIP_IPV6_DHCP6_STATEFUL */
 void dhcp6_tmr(void);
 
 void dhcp6_nd6_ra_trigger(struct netif *netif, u8_t managed_addr_config, u8_t other_config);
